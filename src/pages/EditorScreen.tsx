@@ -4,7 +4,8 @@ import { useAutoSave } from '../hooks/useAutoSave';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import TerritoryEditor from '../components/TerritoryEditor';
 import SideCoach from '../components/SideCoach';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import type { WritingProject } from '../types';
 
 export default function EditorScreen() {
   const { selectedPrompt, selectedType, student, project, setProject, setScreen } = useAppStore();
@@ -18,27 +19,19 @@ export default function EditorScreen() {
     setSaveStatus('saving');
     try {
       let savedProject;
-      if (isSupabaseConfigured && isOnline) {
+      if (isPocketBaseConfigured && isOnline) {
         if (project?.id) {
-          const { data } = await supabase
-            .from('writing_projects')
-            .update({ content, updated_at: new Date().toISOString() })
-            .eq('id', project.id)
-            .select()
-            .single();
-          savedProject = data;
+          savedProject = await pb.collection('writing_projects').update(project.id, {
+            content,
+            updated_at: new Date().toISOString(),
+          });
         } else {
-          const { data } = await supabase
-            .from('writing_projects')
-            .insert({
-              student_id: student.id,
-              prompt_id: selectedPrompt.id,
-              selected_type: selectedType,
-              content,
-            })
-            .select()
-            .single();
-          savedProject = data;
+          savedProject = await pb.collection('writing_projects').create({
+            student_id: student.id,
+            prompt_id: selectedPrompt.id,
+            selected_type: selectedType,
+            content,
+          });
         }
       } else {
         savedProject = {
@@ -54,7 +47,7 @@ export default function EditorScreen() {
       }
 
       if (savedProject) {
-        setProject(savedProject);
+        setProject(savedProject as WritingProject);
       }
       setSaveStatus('saved');
     } catch (err) {

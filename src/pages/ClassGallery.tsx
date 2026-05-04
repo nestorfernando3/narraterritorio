@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
 import { mockProjects } from '../lib/mockData';
 import type { WritingProject } from '../types';
 
@@ -11,15 +11,21 @@ export default function ClassGallery() {
 
   useEffect(() => {
     const loadProjects = async () => {
-      if (isSupabaseConfigured) {
-        const { data } = await supabase
-          .from('writing_projects')
-          .select('*, prompt:prompts(*), student:students(*)')
-          .eq('is_published', true)
-          .order('published_at', { ascending: false });
-
-        if (data) {
-          setProjects(data as WritingProject[]);
+      if (isPocketBaseConfigured) {
+        const result = await pb.collection('writing_projects').getList(1, 100, {
+          filter: 'is_published = true',
+          sort: '-published_at',
+          expand: 'prompt,student',
+        });
+        if (result.items.length > 0) {
+          const mapped = result.items.map((item: any) => ({
+            ...item,
+            prompt: item.expand?.prompt,
+            student: item.expand?.student,
+          }));
+          setProjects(mapped as WritingProject[]);
+        } else {
+          setProjects([]);
         }
       } else {
         setProjects(mockProjects.filter((p) => p.is_published));
@@ -29,24 +35,16 @@ export default function ClassGallery() {
 
     loadProjects();
 
-    // Subscribe to realtime updates if Supabase is configured
-    let subscription: ReturnType<typeof supabase.channel> | null = null;
-    if (isSupabaseConfigured) {
-      subscription = supabase
-        .channel('writing_projects_changes')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'writing_projects' },
-          () => {
-            loadProjects();
-          }
-        )
-        .subscribe();
+    // Subscribe to realtime updates if PocketBase is configured
+    if (isPocketBaseConfigured) {
+      pb.collection('writing_projects').subscribe('*', () => {
+        loadProjects();
+      });
     }
 
     return () => {
-      if (subscription) {
-        supabase.removeChannel(subscription);
+      if (isPocketBaseConfigured) {
+        pb.collection('writing_projects').unsubscribe('*');
       }
     };
   }, []);

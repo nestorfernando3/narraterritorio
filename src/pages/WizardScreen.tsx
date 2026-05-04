@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
 import { mockPrompts } from '../lib/mockData';
 import type { Prompt, TextType } from '../types';
 
@@ -13,10 +13,10 @@ export default function WizardScreen() {
 
   useEffect(() => {
     const loadPrompts = async () => {
-      if (isSupabaseConfigured) {
-        const { data } = await supabase.from('prompts').select('*');
-        if (data && data.length > 0) {
-          setPrompts(data);
+      if (isPocketBaseConfigured) {
+        const result = await pb.collection('prompts').getList(1, 100);
+        if (result.items.length > 0) {
+          setPrompts(result.items as unknown as Prompt[]);
         } else {
           setPrompts(mockPrompts);
         }

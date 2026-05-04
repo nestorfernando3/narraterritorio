@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
 import { mockStudents } from '../lib/mockData';
+import type { Student } from '../types';
 
 export default function WelcomeScreen() {
   const [code, setCode] = useState('');
@@ -18,12 +19,13 @@ export default function WelcomeScreen() {
     try {
       let student;
 
-      if (isSupabaseConfigured) {
-        const { data: session } = await supabase
-          .from('sessions')
-          .select('*')
-          .eq('code', code.toUpperCase())
-          .single();
+      if (isPocketBaseConfigured) {
+        let session;
+        try {
+          session = await pb.collection('sessions').getFirstListItem(`code = "${code.toUpperCase()}"`);
+        } catch {
+          session = null;
+        }
 
         if (!session) {
           alert('Código de sesión no encontrado');
@@ -32,11 +34,10 @@ export default function WelcomeScreen() {
         }
 
         const nickname = `Escritor_${Math.floor(Math.random() * 1000)}`;
-        const { data: newStudent } = await supabase
-          .from('students')
-          .insert({ session_code: code.toUpperCase(), nickname })
-          .select()
-          .single();
+        const newStudent = await pb.collection('students').create({
+          session_code: code.toUpperCase(),
+          nickname,
+        });
 
         student = newStudent;
       } else {
@@ -49,7 +50,7 @@ export default function WelcomeScreen() {
       }
 
       setSessionCode(code.toUpperCase());
-      setStudent(student);
+      setStudent(student as Student);
       setScreen('wizard');
     } catch (err) {
       console.error(err);

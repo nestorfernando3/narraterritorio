@@ -1,7 +1,8 @@
 import { useRef, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import { useAppStore } from '../store/useAppStore';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import type { WritingProject } from '../types';
 
 export default function PublishScreen() {
   const { selectedPrompt, student, project, setProject, setScreen } = useAppStore();
@@ -12,17 +13,11 @@ export default function PublishScreen() {
 
     try {
       let updatedProject;
-      if (isSupabaseConfigured) {
-        const { data } = await supabase
-          .from('writing_projects')
-          .update({
-            is_published: true,
-            published_at: new Date().toISOString(),
-          })
-          .eq('id', project.id)
-          .select()
-          .single();
-        updatedProject = data;
+      if (isPocketBaseConfigured) {
+        updatedProject = await pb.collection('writing_projects').update(project.id, {
+          is_published: true,
+          published_at: new Date().toISOString(),
+        });
       } else {
         updatedProject = {
           ...project,
@@ -32,7 +27,7 @@ export default function PublishScreen() {
       }
 
       if (updatedProject) {
-        setProject(updatedProject);
+        setProject(updatedProject as WritingProject);
       }
     } catch (err) {
       console.error('Publish error:', err);
