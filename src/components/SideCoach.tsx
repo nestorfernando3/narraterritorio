@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { generateAIQuestion, getAvailableProvider } from '../lib/aiService';
 import type { AIInteraction } from '../types';
 
 interface SideCoachProps {
@@ -10,6 +11,7 @@ export default function SideCoach({ currentText }: SideCoachProps) {
   const [activeTab, setActiveTab] = useState<'planificar' | 'inspiracion' | 'sugerencias'>('planificar');
   const [isLoading, setIsLoading] = useState(false);
   const { selectedType, aiCallsRemaining, decrementAICalls, addAIInteraction } = useAppStore();
+  const providerName = getAvailableProvider();
 
   const askAI = async () => {
     if (aiCallsRemaining <= 0 || !selectedType) return;
@@ -20,20 +22,7 @@ export default function SideCoach({ currentText }: SideCoachProps) {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:11434/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'llama3.2',
-          prompt: `Actúa como un profesor de escritura creativa colombiano. El estudiante está escribiendo una ${selectedType} sobre la imagen. NO resuelvas el texto ni corrijas la gramática. Lee lo que lleva escrito y hazle UNA pregunta inspiradora para que describa mejor los sentidos (olor, sonido, vista) o expanda un detalle.\n\nTexto del estudiante:\n${currentText}\n\nPregunta inspiradora:`,
-          stream: false,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Ollama no responde');
-
-      const data = await response.json();
-      const question = data.response?.trim() || '¿Qué detalle sensorial podrías agregar para hacer esta escena más vívida?';
+      const question = await generateAIQuestion(currentText, selectedType);
 
       const interaction: AIInteraction = {
         id: Date.now().toString(),
@@ -44,6 +33,7 @@ export default function SideCoach({ currentText }: SideCoachProps) {
       addAIInteraction(interaction);
       decrementAICalls();
     } catch (err) {
+      console.error('AI error:', err);
       const fallbackQuestion = '¿Qué olor o sonido podrías describir aquí para que el lector sienta que está en ese lugar?';
       addAIInteraction({
         id: Date.now().toString(),
@@ -124,6 +114,10 @@ export default function SideCoach({ currentText }: SideCoachProps) {
             />
           ))}
         </div>
+      </div>
+
+      <div className="text-xs text-gray-400 text-center">
+        Coach: {providerName}
       </div>
 
       <button
