@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import { databases, isAppwriteConfigured, DB_ID, COLLECTION_PROMPTS } from '../lib/appwrite';
 import { mockPrompts } from '../lib/mockData';
 import type { Prompt, TextType } from '../types';
 
@@ -13,10 +13,10 @@ export default function WizardScreen() {
 
   useEffect(() => {
     const loadPrompts = async () => {
-      if (isPocketBaseConfigured) {
-        const result = await pb.collection('prompts').getList(1, 100);
-        if (result.items.length > 0) {
-          setPrompts(result.items as unknown as Prompt[]);
+      if (isAppwriteConfigured) {
+        const result = await databases.listDocuments(DB_ID, COLLECTION_PROMPTS);
+        if (result.documents.length > 0) {
+          setPrompts(result.documents as unknown as Prompt[]);
         } else {
           setPrompts(mockPrompts);
         }

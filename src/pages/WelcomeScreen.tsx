@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Query } from 'appwrite';
 import { useAppStore } from '../store/useAppStore';
-import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import { databases, isAppwriteConfigured, DB_ID, COLLECTION_SESSIONS, COLLECTION_STUDENTS } from '../lib/appwrite';
 import { mockStudents } from '../lib/mockData';
 import type { Student } from '../types';
 
@@ -19,10 +20,13 @@ export default function WelcomeScreen() {
     try {
       let student;
 
-      if (isPocketBaseConfigured) {
+      if (isAppwriteConfigured) {
         let session;
         try {
-          session = await pb.collection('sessions').getFirstListItem(`code = "${code.toUpperCase()}"`);
+          const sessions = await databases.listDocuments(DB_ID, COLLECTION_SESSIONS, [
+            Query.equal('code', code.toUpperCase()),
+          ]);
+          session = sessions.documents[0] || null;
         } catch {
           session = null;
         }
@@ -34,7 +38,7 @@ export default function WelcomeScreen() {
         }
 
         const nickname = `Escritor_${Math.floor(Math.random() * 1000)}`;
-        const newStudent = await pb.collection('students').create({
+        const newStudent = await databases.createDocument(DB_ID, COLLECTION_STUDENTS, 'unique()', {
           session_code: code.toUpperCase(),
           nickname,
         });

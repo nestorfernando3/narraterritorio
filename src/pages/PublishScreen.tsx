@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import { useAppStore } from '../store/useAppStore';
-import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import { databases, isAppwriteConfigured, DB_ID, COLLECTION_PROJECTS } from '../lib/appwrite';
 import type { WritingProject } from '../types';
 
 export default function PublishScreen() {
@@ -13,8 +13,8 @@ export default function PublishScreen() {
 
     try {
       let updatedProject;
-      if (isPocketBaseConfigured) {
-        updatedProject = await pb.collection('writing_projects').update(project.id, {
+      if (isAppwriteConfigured) {
+        updatedProject = await databases.updateDocument(DB_ID, COLLECTION_PROJECTS, project.id, {
           is_published: true,
           published_at: new Date().toISOString(),
         });

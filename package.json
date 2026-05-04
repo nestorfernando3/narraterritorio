@@ -16,8 +16,8 @@
     "@tiptap/extension-placeholder": "^3.22.5",
     "@tiptap/react": "^3.22.5",
     "@tiptap/starter-kit": "^3.22.5",
+    "appwrite": "^25.0.0",
     "html-to-image": "^1.11.13",
-    "pocketbase": "^0.26.8",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "zustand": "^5.0.12"

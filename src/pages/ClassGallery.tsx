@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Query } from 'appwrite';
 import { useAppStore } from '../store/useAppStore';
-import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import { client, databases, isAppwriteConfigured, DB_ID, COLLECTION_PROJECTS } from '../lib/appwrite';
 import { mockProjects } from '../lib/mockData';
 import type { WritingProject } from '../types';
 
@@ -11,19 +12,13 @@ export default function ClassGallery() {
 
   useEffect(() => {
     const loadProjects = async () => {
-      if (isPocketBaseConfigured) {
-        const result = await pb.collection('writing_projects').getList(1, 100, {
-          filter: 'is_published = true',
-          sort: '-published_at',
-          expand: 'prompt,student',
-        });
-        if (result.items.length > 0) {
-          const mapped = result.items.map((item: any) => ({
-            ...item,
-            prompt: item.expand?.prompt,
-            student: item.expand?.student,
-          }));
-          setProjects(mapped as WritingProject[]);
+      if (isAppwriteConfigured) {
+        const result = await databases.listDocuments(DB_ID, COLLECTION_PROJECTS, [
+          Query.equal('is_published', true),
+          Query.orderDesc('published_at'),
+        ]);
+        if (result.documents.length > 0) {
+          setProjects(result.documents as unknown as WritingProject[]);
         } else {
           setProjects([]);
         }
@@ -35,16 +30,21 @@ export default function ClassGallery() {
 
     loadProjects();
 
-    // Subscribe to realtime updates if PocketBase is configured
-    if (isPocketBaseConfigured) {
-      pb.collection('writing_projects').subscribe('*', () => {
-        loadProjects();
-      });
+    // Subscribe to realtime updates if Appwrite is configured
+    let unsubscribe: (() => void) | undefined;
+    if (isAppwriteConfigured) {
+      const sub = client.subscribe(
+        `databases.${DB_ID}.collections.${COLLECTION_PROJECTS}.documents`,
+        () => {
+          loadProjects();
+        }
+      );
+      unsubscribe = sub;
     }
 
     return () => {
-      if (isPocketBaseConfigured) {
-        pb.collection('writing_projects').unsubscribe('*');
+      if (unsubscribe) {
+        unsubscribe();
       }
     };
   }, []);

@@ -4,7 +4,7 @@ import { useAutoSave } from '../hooks/useAutoSave';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import TerritoryEditor from '../components/TerritoryEditor';
 import SideCoach from '../components/SideCoach';
-import { pb, isPocketBaseConfigured } from '../lib/pocketbase';
+import { databases, isAppwriteConfigured, DB_ID, COLLECTION_PROJECTS } from '../lib/appwrite';
 import type { WritingProject } from '../types';
 
 export default function EditorScreen() {
@@ -19,14 +19,14 @@ export default function EditorScreen() {
     setSaveStatus('saving');
     try {
       let savedProject;
-      if (isPocketBaseConfigured && isOnline) {
+      if (isAppwriteConfigured && isOnline) {
         if (project?.id) {
-          savedProject = await pb.collection('writing_projects').update(project.id, {
+          savedProject = await databases.updateDocument(DB_ID, COLLECTION_PROJECTS, project.id, {
             content,
             updated_at: new Date().toISOString(),
           });
         } else {
-          savedProject = await pb.collection('writing_projects').create({
+          savedProject = await databases.createDocument(DB_ID, COLLECTION_PROJECTS, 'unique()', {
             student_id: student.id,
             prompt_id: selectedPrompt.id,
             selected_type: selectedType,
