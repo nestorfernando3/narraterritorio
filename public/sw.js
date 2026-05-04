@@ -1,8 +1,9 @@
-const CACHE_NAME = 'narraterritorio-v1';
+const CACHE_NAME = 'narraterritorio-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/favicon.svg',
 ];
 
 self.addEventListener('install', (event) => {
@@ -28,13 +29,32 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Network-first for assets (JS/CSS with hashes)
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Cache-first for static assets
   event.respondWith(
-    caches.match(event.request).then((response) => {
+    caches.match(request).then((response) => {
       return (
         response ||
-        fetch(event.request).catch(() => {
-          // Offline fallback
-          if (event.request.mode === 'navigate') {
+        fetch(request).catch(() => {
+          if (request.mode === 'navigate') {
             return caches.match('/');
           }
         })
