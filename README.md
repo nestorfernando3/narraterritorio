@@ -1,73 +1,118 @@
-# React + TypeScript + Vite
+# NarraTerritorio ✍️🗺️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Laboratorio Virtual de Escritura Situada**
 
-Currently, two official plugins are available:
+🔗 **Web app:** https://narraterritorio.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🚀 Modos de Uso (sin backend cloud)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+NarraTerritorio funciona **completamente sin Appwrite ni Supabase**. Elige el modo que mejor se adapte a tu situación:
 
-## Expanding the ESLint configuration
+### Modo 1: Servidor Local (Recomendado para aulas)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Para:** Salones de clase con todos los estudiantes en la misma red WiFi.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**Ventajas:**
+- Sincronización en tiempo real
+- Galería compartida instantánea
+- Sin internet requerido (solo red local)
+- Datos guardados automáticamente
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+**Cómo usar:**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. **El profesor** corre el servidor en su laptop:
+```bash
+npm install
+npm run server
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Los estudiantes** abren la app en el navegador (cualquier dispositivo conectado a la misma red):
 ```
+http://IP-DEL-PROFESOR:3000
+```
+
+3. Todos usan el **mismo código de sesión** (ej: `RIO1`) y se sincronizan automáticamente.
+
+**Para encontrar tu IP local:**
+- Mac/Linux: `ifconfig | grep "inet "`
+- Windows: `ipconfig`
+
+---
+
+### Modo 2: Offline Individual (Sin servidor)
+
+**Para:** Uso individual o cuando no hay red local disponible.
+
+**Ventajas:**
+- Cero configuración
+- Funciona sin internet
+- Datos guardados en el navegador
+
+**Limitaciones:**
+- No hay galería compartida (cada estudiante ve solo su trabajo)
+- La IA funciona si hay internet (Groq/Gemini)
+
+**Cómo usar:**
+Simplemente abre la app y empieza a escribir. Todo se guarda automáticamente en tu navegador.
+
+---
+
+## 📦 Instalación
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/nestorfernando3/narraterritorio.git
+cd narraterritorio
+
+# Instalar dependencias
+npm install
+
+# Modo Servidor Local (para aulas)
+npm run server
+# Luego abre http://localhost:3000 en tu navegador
+
+# O solo el frontend (modo offline)
+npm run dev
+```
+
+---
+
+## 🎯 Flujo del Estudiante
+
+1. **Entrar:** Ingresa el código de 4 letras que te dio el docente
+2. **Elegir:** Selecciona un estímulo (foto del territorio)
+3. **Escribir:** Usa el editor con el coach de IA
+4. **Publicar:** Tu texto aparece en la galería del salón
+
+---
+
+## 🛠️ Stack Técnico
+
+- **Frontend:** Vite + React + TypeScript + Tailwind CSS
+- **Editor:** Tiptap (rich text)
+- **Estado:** Zustand + localStorage
+- **Sync (opcional):** WebSocket server local
+- **IA:** Groq Cloud / Google Gemini (gratuito)
+- **Deploy:** Vercel
+
+---
+
+## 📄 Guía para Docentes
+
+Ver [GUIDE_FOR_TEACHERS.md](./GUIDE_FOR_TEACHERS.md)
+
+---
+
+## 🤝 Contribuir
+
+1. Fork el repo
+2. Crea una rama (`git checkout -b feature/nueva-funcion`)
+3. Commit (`git commit -am 'feat: nueva funcion'`)
+4. Push (`git push origin feature/nueva-funcion`)
+5. Abre un Pull Request
+
+---
+
+Construido con ❤️ para el Caribe colombiano.
