@@ -6,76 +6,18 @@
 
 ---
 
-## 🚀 Modos de Uso (sin backend cloud)
+## 🚀 Acceso
 
-NarraTerritorio funciona **completamente sin Appwrite ni Supabase**. Elige el modo que mejor se adapte a tu situación:
+La app funciona completamente en la nube. No necesitas instalar nada.
 
-### Modo 1: Servidor Local (Recomendado para aulas)
+**Para docentes:**
+1. Ve a https://narraterritorio.vercel.app
+2. Comparte el código de sesión con tus estudiantes (cualquier código de 4 letras)
 
-**Para:** Salones de clase con todos los estudiantes en la misma red WiFi.
-
-**Ventajas:**
-- Sincronización en tiempo real
-- Galería compartida instantánea
-- Sin internet requerido (solo red local)
-- Datos guardados automáticamente
-
-**Cómo usar:**
-
-1. **El profesor** corre el servidor en su laptop:
-```bash
-npm install
-npm run server
-```
-
-2. **Los estudiantes** abren la app en el navegador (cualquier dispositivo conectado a la misma red):
-```
-http://IP-DEL-PROFESOR:3000
-```
-
-3. Todos usan el **mismo código de sesión** (ej: `RIO1`) y se sincronizan automáticamente.
-
-**Para encontrar tu IP local:**
-- Mac/Linux: `ifconfig | grep "inet "`
-- Windows: `ipconfig`
-
----
-
-### Modo 2: Offline Individual (Sin servidor)
-
-**Para:** Uso individual o cuando no hay red local disponible.
-
-**Ventajas:**
-- Cero configuración
-- Funciona sin internet
-- Datos guardados en el navegador
-
-**Limitaciones:**
-- No hay galería compartida (cada estudiante ve solo su trabajo)
-- La IA funciona si hay internet (Groq/Gemini)
-
-**Cómo usar:**
-Simplemente abre la app y empieza a escribir. Todo se guarda automáticamente en tu navegador.
-
----
-
-## 📦 Instalación
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/nestorfernando3/narraterritorio.git
-cd narraterritorio
-
-# Instalar dependencias
-npm install
-
-# Modo Servidor Local (para aulas)
-npm run server
-# Luego abre http://localhost:3000 en tu navegador
-
-# O solo el frontend (modo offline)
-npm run dev
-```
+**Para estudiantes:**
+1. Ve a https://narraterritorio.vercel.app
+2. Ingresa el código de 4 letras
+3. ¡Listo!
 
 ---
 
@@ -88,12 +30,25 @@ npm run dev
 
 ---
 
+## 📋 ¿Qué es?
+
+NarraTerritorio es un laboratorio virtual donde tus estudiantes practican escritura creativa y argumentativa anclada al contexto del Caribe colombiano. La herramienta usa estímulos visuales (imágenes del territorio) y un asistente de IA para acompañar al estudiante desde la planificación hasta la versión final.
+
+### Características:
+- **Andamiaje mediante plantillas:** Los estudiantes no empiezan desde cero. Eligen un estímulo y un tipo textual (microcuento, crónica, carta).
+- **Feedback formativo lateral:** La IA hace preguntas provocadoras, nunca corrige ni reescribe.
+- **Cero fricción:** Los estudiantes entran sin crear cuenta, solo con un código de sesión de 4 letras.
+- **Producto final visual:** Al terminar, el texto se convierte en una tarjeta descargable tipo póster.
+- **Galería compartida:** Los estudiantes ven las publicaciones de sus compañeros en tiempo real.
+
+---
+
 ## 🛠️ Stack Técnico
 
 - **Frontend:** Vite + React + TypeScript + Tailwind CSS
 - **Editor:** Tiptap (rich text)
 - **Estado:** Zustand + localStorage
-- **Sync (opcional):** WebSocket server local
+- **Backend:** Appwrite Cloud (Frankfurt)
 - **IA:** Groq Cloud / Google Gemini (gratuito)
 - **Deploy:** Vercel
 
